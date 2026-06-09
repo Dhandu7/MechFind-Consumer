@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useState, useContext, createContext, useEffect } from 'react'
 import './App.css'
 import { vendors, myVehicle, myBookings, aiConversation } from './data.js'
 import CalgaryMap from './CalgaryMap.jsx'
+
+/* ── Theme context ── */
+const ThemeCtx = createContext({ dark: true, toggle: () => {} })
 
 const statusMap = { requested: 'Pending', accepted: 'Accepted', inProgress: 'In Progress', done: 'Completed', rejected: 'Rejected' }
 const servicePrices = { 'Oil Change': 79, 'Brake Inspection': 49, 'Brake Pad Replacement': 220, 'Engine Diagnostic': 120, 'Tire Rotation': 55, 'Battery Test & Replace': 160, 'Transmission Service': 280, 'AC Service': 180, 'Fluid Top-Up': 45 }
@@ -74,6 +77,15 @@ function BottomNav({ page, setPage }) {
   )
 }
 
+function ThemeToggle() {
+  const { dark, toggle } = useContext(ThemeCtx)
+  return (
+    <button onClick={toggle} className="btn btn-ghost btn-sm theme-toggle" title={dark ? 'Switch to light mode' : 'Switch to dark mode'} style={{ fontSize: 16, padding: '6px 9px', lineHeight: 1 }}>
+      {dark ? '☀️' : '🌙'}
+    </button>
+  )
+}
+
 function Topbar({ title, subtitle, onMenu, children }) {
   return (
     <div className="topbar">
@@ -86,6 +98,7 @@ function Topbar({ title, subtitle, onMenu, children }) {
       </div>
       <div className="topbar-actions">
         {children}
+        <ThemeToggle />
         <div className="notif-btn">
           <button className="btn btn-ghost btn-sm" style={{ fontSize: 18, padding: '6px 8px' }}>🔔</button>
           <div className="notification-dot" />
@@ -635,8 +648,20 @@ export default function App() {
   const [page, setPage] = useState('home')
   const [selectedVendor, setSelectedVendor] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [dark, setDark] = useState(() => localStorage.getItem('mf-consumer-theme') !== 'light')
 
-  if (!authed) return <Login onLogin={() => setAuthed(true)} />
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+    localStorage.setItem('mf-consumer-theme', dark ? 'dark' : 'light')
+  }, [dark])
+
+  const toggle = () => setDark(d => !d)
+
+  if (!authed) return (
+    <ThemeCtx.Provider value={{ dark, toggle }}>
+      <Login onLogin={() => setAuthed(true)} />
+    </ThemeCtx.Provider>
+  )
 
   const onMenu = () => setSidebarOpen(o => !o)
   const onClose = () => setSidebarOpen(false)
@@ -653,10 +678,12 @@ export default function App() {
   }
 
   return (
-    <div className="layout">
-      <Sidebar page={navPage} setPage={setPage} open={sidebarOpen} onClose={onClose} />
-      <main className="main">{pages[page] || pages.home}</main>
-      <BottomNav page={navPage} setPage={p => { setPage(p); onClose() }} />
-    </div>
+    <ThemeCtx.Provider value={{ dark, toggle }}>
+      <div className="layout">
+        <Sidebar page={navPage} setPage={setPage} open={sidebarOpen} onClose={onClose} />
+        <main className="main">{pages[page] || pages.home}</main>
+        <BottomNav page={navPage} setPage={p => { setPage(p); onClose() }} />
+      </div>
+    </ThemeCtx.Provider>
   )
 }

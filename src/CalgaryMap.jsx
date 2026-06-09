@@ -15,39 +15,59 @@ function latLng(lat, lng) {
   return [x, y]
 }
 
+/* ── Google Maps fixed colour palette ──────────────────────── */
+const GM = {
+  land:        '#e8e0d8',   // warm parchment — Google's land base
+  landDark:    '#ddd5cc',   // slightly darker fill variant
+  park:        '#c8dab0',   // muted sage green — Google park
+  parkStroke:  '#b5c89a',
+  water:       '#a8d5f0',   // sky-blue — Google water
+  waterDeep:   '#89c4e8',
+  hwy:         '#f8c84a',   // amber-yellow — Google highway
+  hwyStroke:   '#e0a830',
+  road:        '#ffffff',   // white arterial
+  roadStroke:  '#d8d0c8',   // pale warm-gray outline
+  minor:       '#f2ede6',   // minor road fill
+  minorStroke: '#d0c8be',
+  label:       '#5c544e',   // dark warm-gray label
+  labelPark:   '#4a7040',   // dark green park label
+  labelWater:  '#2c78b0',   // blue water label
+  labelHwy:    '#8a5a00',   // brown highway label
+}
+
 /* ── Road network (approximate Calgary NW coords) ─────────── */
 const HIGHWAYS = [
   // 16 Ave NW (Trans-Canada) — E-W ~lat 51.057
-  { name: '16 Ave NW', pts: [[-114.265, 51.057], [-114.220, 51.057], [-114.150, 51.059], [-114.090, 51.057]], color: '#e8a020', w: 3 },
+  { name: '16 Ave NW', pts: [[-114.265, 51.057], [-114.220, 51.057], [-114.150, 51.059], [-114.090, 51.057]], color: GM.hwy, stroke: GM.hwyStroke, w: 5 },
   // John Laurie Blvd — E-W ~lat 51.106
-  { name: 'John Laurie Blvd', pts: [[-114.265, 51.106], [-114.220, 51.106], [-114.170, 51.107], [-114.135, 51.106], [-114.090, 51.106]], color: '#c97c18', w: 2.5 },
+  { name: 'John Laurie Blvd', pts: [[-114.265, 51.106], [-114.220, 51.106], [-114.170, 51.107], [-114.135, 51.106], [-114.090, 51.106]], color: GM.hwy, stroke: GM.hwyStroke, w: 4 },
   // Crowfoot Trail — shorter E-W ~lat 51.115
-  { name: 'Crowfoot Trail', pts: [[-114.230, 51.115], [-114.190, 51.115], [-114.150, 51.115]], color: '#c97c18', w: 2 },
+  { name: 'Crowfoot Trail', pts: [[-114.230, 51.115], [-114.190, 51.115], [-114.150, 51.115]], color: GM.hwy, stroke: GM.hwyStroke, w: 3.5 },
 ]
 
 const ARTERIALS = [
-  // Shaganappi Trail — N-S ~lng -114.163
-  { pts: [[-114.163, 51.038], [-114.163, 51.075], [-114.165, 51.098], [-114.168, 51.118]], w: 2 },
-  // Crowchild Trail — N-S ~lng -114.130
-  { pts: [[-114.130, 51.038], [-114.130, 51.060], [-114.131, 51.085], [-114.133, 51.108]], w: 2 },
-  // Sarcee Trail — N-S ~lng -114.215
-  { pts: [[-114.215, 51.045], [-114.215, 51.080], [-114.216, 51.110], [-114.218, 51.125]], w: 2 },
-  // 14 St NW — N-S ~lng -114.094
-  { pts: [[-114.094, 51.050], [-114.094, 51.080], [-114.095, 51.108]], w: 1.5 },
-  // Bowness Rd — E-W ~lat 51.085
-  { pts: [[-114.240, 51.085], [-114.210, 51.085], [-114.190, 51.086], [-114.175, 51.086]], w: 1.5 },
-  // Nose Hill Dr — N-S ~lng -114.140
-  { pts: [[-114.140, 51.090], [-114.140, 51.105], [-114.141, 51.120], [-114.142, 51.130]], w: 1.5 },
-  // Northland Dr — E-W ~lat 51.102
-  { pts: [[-114.175, 51.102], [-114.155, 51.102], [-114.140, 51.102], [-114.120, 51.102], [-114.095, 51.101]], w: 1.5 },
-  // Varsity Dr — E-W ~lat 51.091
-  { pts: [[-114.200, 51.091], [-114.180, 51.091], [-114.160, 51.092], [-114.145, 51.091]], w: 1.5 },
-  // Brentwood Blvd — E-W ~lat 51.097
-  { pts: [[-114.140, 51.097], [-114.120, 51.097], [-114.095, 51.096]], w: 1 },
-  // Silver Springs Blvd — loop ~lat 51.098-51.108
-  { pts: [[-114.215, 51.098], [-114.205, 51.098], [-114.200, 51.102], [-114.205, 51.108], [-114.215, 51.108]], w: 1 },
-  // Market Mall / Crowfoot Ave area
-  { pts: [[-114.190, 51.108], [-114.175, 51.108], [-114.160, 51.108]], w: 1 },
+  // Shaganappi Trail
+  { pts: [[-114.163, 51.038], [-114.163, 51.075], [-114.165, 51.098], [-114.168, 51.118]], w: 3 },
+  // Crowchild Trail
+  { pts: [[-114.130, 51.038], [-114.130, 51.060], [-114.131, 51.085], [-114.133, 51.108]], w: 3 },
+  // Sarcee Trail
+  { pts: [[-114.215, 51.045], [-114.215, 51.080], [-114.216, 51.110], [-114.218, 51.125]], w: 3 },
+  // 14 St NW
+  { pts: [[-114.094, 51.050], [-114.094, 51.080], [-114.095, 51.108]], w: 2.5 },
+  // Bowness Rd
+  { pts: [[-114.240, 51.085], [-114.210, 51.085], [-114.190, 51.086], [-114.175, 51.086]], w: 2.5 },
+  // Nose Hill Dr
+  { pts: [[-114.140, 51.090], [-114.140, 51.105], [-114.141, 51.120], [-114.142, 51.130]], w: 2.5 },
+  // Northland Dr
+  { pts: [[-114.175, 51.102], [-114.155, 51.102], [-114.140, 51.102], [-114.120, 51.102], [-114.095, 51.101]], w: 2.5 },
+  // Varsity Dr
+  { pts: [[-114.200, 51.091], [-114.180, 51.091], [-114.160, 51.092], [-114.145, 51.091]], w: 2.5 },
+  // Brentwood Blvd
+  { pts: [[-114.140, 51.097], [-114.120, 51.097], [-114.095, 51.096]], w: 2 },
+  // Silver Springs Blvd
+  { pts: [[-114.215, 51.098], [-114.205, 51.098], [-114.200, 51.102], [-114.205, 51.108], [-114.215, 51.108]], w: 2 },
+  // Market Mall / Crowfoot Ave
+  { pts: [[-114.190, 51.108], [-114.175, 51.108], [-114.160, 51.108]], w: 2 },
 ]
 
 /* ── Bow River (sinuous E-W path across south portion) ─────── */
@@ -142,160 +162,179 @@ export default function CalgaryMap({ onSelectVendor, selectedVendorId }) {
     ctx.translate(tx, ty)
     ctx.scale(scale, scale)
 
-    // Background
-    ctx.fillStyle = '#080d1a'
-    ctx.fillRect(-2000, -2000, 6000, 6000)
+    // ── Google Maps style background ──────────────────────────
 
-    // Block fill (lighter city background)
-    ctx.fillStyle = '#0d1427'
+    // Land base — warm parchment
+    ctx.fillStyle = GM.land
+    ctx.fillRect(-2000, -2000, 6000, 6000)
     ctx.fillRect(0, 0, BASE_W, BASE_H)
 
-    // Nose Hill Park
+    // Nose Hill Park — sage green polygon
     ctx.beginPath()
     const noseFirst = latLng(NOSE_HILL[0][1], NOSE_HILL[0][0])
     ctx.moveTo(...noseFirst)
     NOSE_HILL.forEach(([lng, lat]) => { const [x, y] = latLng(lat, lng); ctx.lineTo(x, y) })
     ctx.closePath()
-    ctx.fillStyle = '#0f2a1a'
+    ctx.fillStyle = GM.park
     ctx.fill()
-    ctx.strokeStyle = '#1a4a2a'
+    ctx.strokeStyle = GM.parkStroke
     ctx.lineWidth = 1.5
     ctx.stroke()
 
-    // Nose Hill label area — subtle texture dots
-    ctx.fillStyle = '#1a4a2a44'
+    // Park texture — subtle stipple dots
+    ctx.fillStyle = GM.parkStroke + '88'
     for (let i = 0; i < 60; i++) {
       const dotX = 390 + Math.sin(i * 1.3) * 70 + (i % 8) * 12
       const dotY = 120 + Math.cos(i * 0.9) * 50 + Math.floor(i / 8) * 14
       ctx.beginPath()
-      ctx.arc(dotX, dotY, 1.5, 0, Math.PI * 2)
+      ctx.arc(dotX, dotY, 1.2, 0, Math.PI * 2)
       ctx.fill()
     }
 
-    // Bow River
-    drawRiverSmooth(ctx, BOW_RIVER)
+    // Bow River — Google Maps water blue
+    ctx.beginPath()
+    const [bx0, by0] = latLng(BOW_RIVER[0][1], BOW_RIVER[0][0])
+    ctx.moveTo(bx0, by0)
+    for (let i = 1; i < BOW_RIVER.length - 1; i++) {
+      const [x1, y1] = latLng(BOW_RIVER[i][1], BOW_RIVER[i][0])
+      const [x2, y2] = latLng(BOW_RIVER[i+1][1], BOW_RIVER[i+1][0])
+      ctx.quadraticCurveTo(x1, y1, (x1+x2)/2, (y1+y2)/2)
+    }
+    const [blx, bly] = latLng(BOW_RIVER[BOW_RIVER.length-1][1], BOW_RIVER[BOW_RIVER.length-1][0])
+    ctx.lineTo(blx, bly)
+    ctx.strokeStyle = GM.waterDeep
+    ctx.lineWidth = 10
+    ctx.lineCap = 'round'
+    ctx.stroke()
+    ctx.strokeStyle = GM.water
+    ctx.lineWidth = 7
+    ctx.stroke()
+    ctx.lineCap = 'butt'
 
-    // "Bow River" label
+    // "Bow River" italic label
     const [brx, bry] = latLng(51.063, -114.190)
     ctx.save()
-    ctx.font = `italic ${9 / scale + 8}px Inter, sans-serif`
-    ctx.fillStyle = '#3b82f699'
-    ctx.fillText('Bow River', brx - 20, bry - 8)
+    ctx.font = `italic 600 9px Inter, sans-serif`
+    ctx.fillStyle = GM.labelWater
+    ctx.fillText('Bow River', brx - 20, bry - 7)
     ctx.restore()
 
-    // Arterials
+    // Arterials — white roads with warm-gray outline
     ARTERIALS.forEach(r => {
-      drawPath(ctx, r.pts.map(([lng, lat]) => [lng, lat]), '#1e2d48', r.w * 1)
-      // road center line
-      drawPath(ctx, r.pts.map(([lng, lat]) => [lng, lat]), '#253554', r.w * 0.4)
+      const coords = r.pts.map(([lng, lat]) => [lng, lat])
+      drawPath(ctx, coords, GM.roadStroke, r.w + 2)   // outline
+      drawPath(ctx, coords, GM.road, r.w)              // fill
     })
 
-    // Highways
+    // Highways — drawn as outline + amber fill (Google style)
     HIGHWAYS.forEach(h => {
-      // glow
-      ctx.shadowColor = h.color + '44'
-      ctx.shadowBlur = 6
-      drawPath(ctx, h.pts.map(([lng, lat]) => [lng, lat]), h.color + 'aa', h.w * 2)
-      ctx.shadowBlur = 0
-      drawPath(ctx, h.pts.map(([lng, lat]) => [lng, lat]), h.color, h.w)
+      const coords = h.pts.map(([lng, lat]) => [lng, lat])
+      drawPath(ctx, coords, h.stroke, h.w + 3)    // dark outline
+      drawPath(ctx, coords, h.color, h.w)         // amber fill
     })
 
     // Highway labels
     ctx.font = `bold 9px Inter, sans-serif`
-    ctx.fillStyle = '#e8a02099'
+    ctx.fillStyle = GM.labelHwy
     const [h16x, h16y] = latLng(51.057, -114.230)
-    ctx.fillText('16 Ave NW', h16x, h16y - 5)
+    ctx.fillText('16 Ave NW', h16x, h16y - 6)
     const [jlx, jly] = latLng(51.106, -114.245)
-    ctx.fillText('John Laurie Blvd', jlx, jly - 5)
+    ctx.fillText('John Laurie Blvd', jlx, jly - 6)
 
     // Neighbourhood labels
     LABELS.forEach(l => {
       const [lx, ly] = latLng(l.lat, l.lng)
-      ctx.font = `600 10px Inter, sans-serif`
-      ctx.fillStyle = '#4a6a9966'
       const lines = l.name.split('\n')
-      lines.forEach((line, i) => ctx.fillText(line.toUpperCase(), lx, ly + i * 13))
+      const ispark = l.name.includes('Hill')
+      ctx.font = `600 9px Inter, sans-serif`
+      ctx.fillStyle = ispark ? GM.labelPark : GM.label
+      lines.forEach((line, i) => ctx.fillText(line.toUpperCase(), lx, ly + i * 12))
     })
 
     // Pulse animation tick
     const pulse = pulseRef.current
     const pulseFactor = 0.5 + 0.5 * Math.sin(pulse * 0.08)
 
-    // User location pin
+    // User location pin — Google Maps blue dot style
     const [ulx, uly] = latLng(MY_LOCATION.lat, MY_LOCATION.lng)
-    // Outer pulse ring
+    // Accuracy ring (pulse)
     ctx.beginPath()
-    ctx.arc(ulx, uly, 16 + pulseFactor * 8, 0, Math.PI * 2)
-    ctx.fillStyle = `rgba(139,92,246,${0.10 + pulseFactor * 0.10})`
+    ctx.arc(ulx, uly, 18 + pulseFactor * 8, 0, Math.PI * 2)
+    ctx.fillStyle = `rgba(66,133,244,${0.10 + pulseFactor * 0.08})`
     ctx.fill()
-    // Inner pulse ring
     ctx.beginPath()
-    ctx.arc(ulx, uly, 10 + pulseFactor * 4, 0, Math.PI * 2)
-    ctx.fillStyle = `rgba(139,92,246,${0.20 + pulseFactor * 0.10})`
+    ctx.arc(ulx, uly, 12 + pulseFactor * 4, 0, Math.PI * 2)
+    ctx.fillStyle = `rgba(66,133,244,${0.18 + pulseFactor * 0.08})`
     ctx.fill()
-    // Core dot
+    // White halo
     ctx.beginPath()
-    ctx.arc(ulx, uly, 6, 0, Math.PI * 2)
-    ctx.fillStyle = '#8b5cf6'
-    ctx.shadowColor = '#8b5cf6'
-    ctx.shadowBlur = 12
+    ctx.arc(ulx, uly, 8, 0, Math.PI * 2)
+    ctx.fillStyle = '#ffffff'
+    ctx.shadowColor = 'rgba(0,0,0,0.3)'
+    ctx.shadowBlur = 4
     ctx.fill()
     ctx.shadowBlur = 0
+    // Blue core
+    ctx.beginPath()
+    ctx.arc(ulx, uly, 6, 0, Math.PI * 2)
+    ctx.fillStyle = '#4285f4'
+    ctx.fill()
     // Label
-    ctx.font = 'bold 10px Inter, sans-serif'
-    ctx.fillStyle = '#c4b5fd'
-    ctx.fillText('You', ulx + 9, uly + 4)
+    ctx.font = 'bold 9px Inter, sans-serif'
+    ctx.fillStyle = '#1a73e8'
+    ctx.fillText('You', ulx + 10, uly + 4)
 
-    // Shop pins
+    // Shop pins — Google Maps teardrop style
     vendors.forEach(v => {
       const [px, py] = latLng(v.lat, v.lng)
       const isSelected = v.id === selectedVendorId
-      const pinColor = isSelected ? '#8b5cf6' : '#f97316'
-      const labelBg = isSelected ? 'rgba(139,92,246,0.9)' : 'rgba(249,115,22,0.9)'
+      // Google Maps red for unselected, blue for selected
+      const pinColor  = isSelected ? '#1a73e8' : '#ea4335'
+      const pinStroke = isSelected ? '#1557b0' : '#c5221f'
+      const labelBg   = isSelected ? 'rgba(26,115,232,0.95)' : 'rgba(234,67,53,0.95)'
 
-      // Pin shadow
+      // Drop shadow
       ctx.beginPath()
-      ctx.arc(px, py + 2, 10, 0, Math.PI * 2)
-      ctx.fillStyle = 'rgba(0,0,0,0.4)'
+      ctx.arc(px, py + 2, 11, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(0,0,0,0.20)'
       ctx.fill()
 
-      // Pin circle
+      // Pin body
       ctx.beginPath()
       ctx.arc(px, py, 10, 0, Math.PI * 2)
       ctx.fillStyle = pinColor
-      ctx.shadowColor = pinColor
-      ctx.shadowBlur = isSelected ? 18 : 8
       ctx.fill()
-      ctx.strokeStyle = isSelected ? '#c4b5fd' : '#fed7aa'
+      ctx.strokeStyle = pinStroke
       ctx.lineWidth = 1.5
       ctx.stroke()
-      ctx.shadowBlur = 0
 
-      // Rating star inside pin
-      ctx.font = 'bold 8px Inter, sans-serif'
-      ctx.fillStyle = '#fff'
-      ctx.textAlign = 'center'
-      ctx.fillText(v.rating.toFixed(1), px, py + 3)
-      ctx.textAlign = 'left'
+      // White ring inside
+      ctx.beginPath()
+      ctx.arc(px, py, 5, 0, Math.PI * 2)
+      ctx.fillStyle = '#ffffff'
+      ctx.fill()
 
-      // Label bubble
-      const labelW = 90
-      const labelH = 26
-      const labelX = px + 14
-      const labelY = py - labelH / 2
+      // Rating label bubble
+      const name = v.businessName.length > 14 ? v.businessName.slice(0, 13) + '…' : v.businessName
+      const labelW = 88, labelH = 26
+      const labelX = px + 13, labelY = py - labelH / 2
 
+      // Bubble shadow
+      ctx.shadowColor = 'rgba(0,0,0,0.18)'
+      ctx.shadowBlur = 6
+      ctx.shadowOffsetY = 2
       ctx.beginPath()
       ctx.roundRect(labelX, labelY, labelW, labelH, 5)
       ctx.fillStyle = labelBg
       ctx.fill()
+      ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0
 
       ctx.font = 'bold 8px Inter, sans-serif'
-      ctx.fillStyle = '#fff'
-      const name = v.businessName.length > 14 ? v.businessName.slice(0, 13) + '…' : v.businessName
+      ctx.fillStyle = '#ffffff'
       ctx.fillText(name, labelX + 5, labelY + 11)
       ctx.font = '7px Inter, sans-serif'
-      ctx.fillStyle = 'rgba(255,255,255,0.8)'
-      ctx.fillText(`${v.distance}km · ⭐${v.rating}`, labelX + 5, labelY + 21)
+      ctx.fillStyle = 'rgba(255,255,255,0.88)'
+      ctx.fillText(`${v.distance}km · ★${v.rating}`, labelX + 5, labelY + 21)
     })
 
     ctx.restore()
@@ -304,22 +343,22 @@ export default function CalgaryMap({ onSelectVendor, selectedVendorId }) {
     const cx2 = W - 36, cy2 = 36
     ctx.save()
     ctx.font = 'bold 9px Inter, sans-serif'
-    ctx.fillStyle = '#4a6a99'
+    ctx.fillStyle = '#5c544e'
     ctx.textAlign = 'center'
     ctx.fillText('N', cx2, cy2 - 14)
-    ctx.fillStyle = '#8b5cf666'
+    ctx.fillStyle = '#ea4335aa'
     ctx.beginPath(); ctx.moveTo(cx2, cy2 - 10); ctx.lineTo(cx2 - 5, cy2 + 10); ctx.lineTo(cx2, cy2 + 6); ctx.lineTo(cx2 + 5, cy2 + 10); ctx.closePath(); ctx.fill()
     ctx.restore()
 
     // Scale bar (bottom-left, fixed)
     ctx.save()
-    ctx.strokeStyle = '#4a6a9988'
+    ctx.strokeStyle = '#8a807888'
     ctx.lineWidth = 2
     ctx.beginPath(); ctx.moveTo(16, H - 20); ctx.lineTo(66, H - 20); ctx.stroke()
     ctx.beginPath(); ctx.moveTo(16, H - 20); ctx.lineTo(16, H - 14); ctx.stroke()
     ctx.beginPath(); ctx.moveTo(66, H - 20); ctx.lineTo(66, H - 14); ctx.stroke()
     ctx.font = '9px Inter, sans-serif'
-    ctx.fillStyle = '#4a6a99aa'
+    ctx.fillStyle = '#8a8078bb'
     ctx.textAlign = 'center'
     ctx.fillText('~3 km', 41, H - 8)
     ctx.restore()
@@ -486,7 +525,7 @@ export default function CalgaryMap({ onSelectVendor, selectedVendorId }) {
   }
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%', borderRadius: 14, overflow: 'hidden', background: '#080d1a', border: '1px solid rgba(139,92,246,0.2)' }}>
+    <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%', borderRadius: 14, overflow: 'hidden', background: GM.land, border: '1px solid rgba(0,0,0,0.12)' }}>
       <canvas
         ref={canvasRef}
         style={{ display: 'block', cursor: 'grab', width: '100%', height: '100%' }}
@@ -501,32 +540,33 @@ export default function CalgaryMap({ onSelectVendor, selectedVendorId }) {
       />
 
       {/* Zone label */}
-      <div style={{ position: 'absolute', top: 12, left: 12, fontSize: 11, fontWeight: 700, letterSpacing: '0.5px', color: '#8b92aa', background: 'rgba(8,13,26,0.85)', padding: '4px 10px', borderRadius: 20, border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(4px)' }}>
+      <div style={{ position: 'absolute', top: 12, left: 12, fontSize: 11, fontWeight: 600, letterSpacing: '0.4px', color: '#5c544e', background: 'rgba(255,255,255,0.92)', padding: '4px 10px', borderRadius: 20, border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 1px 4px rgba(0,0,0,0.14)', backdropFilter: 'blur(4px)' }}>
         📍 Calgary, AB — NW Zone
       </div>
 
-      {/* Zoom controls */}
-      <div style={{ position: 'absolute', bottom: 48, right: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {[{ label: '+', fn: zoomIn }, { label: '−', fn: zoomOut }, { label: '⊙', fn: resetView }].map(({ label, fn }) => (
+      {/* Zoom controls — Google Maps style */}
+      <div style={{ position: 'absolute', bottom: 48, right: 12, display: 'flex', flexDirection: 'column', gap: 1, borderRadius: 4, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.22)', border: '1px solid rgba(0,0,0,0.12)' }}>
+        {[{ label: '+', fn: zoomIn }, { label: '−', fn: zoomOut }, { label: '⊙', fn: resetView }].map(({ label, fn }, i) => (
           <button key={label} onClick={fn} style={{
-            width: 32, height: 32, borderRadius: 8, border: '1px solid rgba(139,92,246,0.3)',
-            background: 'rgba(8,13,26,0.9)', color: '#c4b5fd', fontSize: label === '⊙' ? 14 : 18,
+            width: 34, height: 34, border: 'none',
+            borderTop: i > 0 ? '1px solid rgba(0,0,0,0.10)' : 'none',
+            background: '#ffffff', color: '#5c544e',
+            fontSize: label === '⊙' ? 13 : 19,
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backdropFilter: 'blur(4px)', fontWeight: 700, lineHeight: 1,
-            transition: 'background 0.15s',
+            fontWeight: 700, lineHeight: 1, transition: 'background 0.12s',
           }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(139,92,246,0.25)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(8,13,26,0.9)'}
+            onMouseEnter={e => e.currentTarget.style.background = '#f5f2ec'}
+            onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
           >{label}</button>
         ))}
       </div>
 
       {/* Legend */}
-      <div style={{ position: 'absolute', bottom: 12, left: 12, display: 'flex', gap: 12, fontSize: 10, color: '#8b92aa', background: 'rgba(8,13,26,0.85)', padding: '6px 10px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(4px)' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f97316', display: 'inline-block' }} />Shop</span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#8b5cf6', display: 'inline-block' }} />Selected</span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#8b5cf6', opacity: 0.5, display: 'inline-block' }} />You</span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 3, background: '#3b82f8', opacity: 0.6, display: 'inline-block', borderRadius: 2 }} />Bow River</span>
+      <div style={{ position: 'absolute', bottom: 12, left: 12, display: 'flex', gap: 10, fontSize: 10, color: '#6b6460', background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.10)', boxShadow: '0 1px 4px rgba(0,0,0,0.10)', backdropFilter: 'blur(4px)' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ea4335', display: 'inline-block' }} />Shop</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#1a73e8', display: 'inline-block' }} />Selected</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4285f4', display: 'inline-block' }} />You</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 3, background: '#a8d5f0', display: 'inline-block', borderRadius: 2 }} />Bow River</span>
       </div>
     </div>
   )
